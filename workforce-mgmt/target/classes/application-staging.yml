@@ -1,0 +1,31 @@
+spring:
+  datasource:
+    # Use Supabase connection POOLER (port 6543, PgBouncer) — NOT direct port 5432
+    # Direct connections (5432) bypass PgBouncer and exhaust Supabase's connection limit fast
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      # LF-205 FIX: Supabase idles out connections after ~5min of inactivity.
+      # max-lifetime < idle kill window keeps pool healthy.
+      maximum-pool-size: 15
+      minimum-idle: 3
+      keepalive-time: 60000
+      idle-timeout: 240000     # 4min — evict before Supabase's 5min kill
+      max-lifetime: 480000     # 8min rotation cycle
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD}
+      connect-timeout: 3000
+      timeout: 2000
+
+cors:
+  allowed-origins:
+    - ${FRONTEND_URL}
+
+# Enable SQL logging only in staging for debugging — disable in prod
+  jpa:
+    show-sql: false

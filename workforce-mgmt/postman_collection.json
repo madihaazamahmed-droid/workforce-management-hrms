@@ -1,0 +1,129 @@
+{
+  "info": {
+    "name": "Workforce Management API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base", "value": "http://localhost:8080" }
+  ],
+  "item": [
+    {
+      "name": "Workers",
+      "item": [
+        {
+          "name": "Create Worker",
+          "request": {
+            "method": "POST",
+            "url": "{{base}}/api/workers",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Ravi Kumar\",\"phone\":\"9876543210\",\"designation\":\"MASON\",\"dailyWageRate\":800,\"active\":true}"
+            }
+          }
+        },
+        {
+          "name": "Get Worker",
+          "request": { "method": "GET", "url": "{{base}}/api/workers/1" }
+        },
+        {
+          "name": "Update Worker",
+          "request": {
+            "method": "PUT",
+            "url": "{{base}}/api/workers/1",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Ravi Kumar\",\"phone\":\"9876543210\",\"designation\":\"SUPERVISOR\",\"dailyWageRate\":1200,\"active\":true}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sites",
+      "item": [
+        {
+          "name": "Create Site",
+          "request": {
+            "method": "POST",
+            "url": "{{base}}/api/sites",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"siteName\":\"Greenfield Phase 2\",\"location\":\"Whitefield, Bengaluru\",\"active\":true}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Attendance",
+      "item": [
+        {
+          "name": "Clock In",
+          "request": {
+            "method": "POST",
+            "url": "{{base}}/api/attendance/clock-in",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"workerId\":1,\"siteId\":1}" }
+          }
+        },
+        {
+          "name": "Clock Out",
+          "request": {
+            "method": "POST",
+            "url": "{{base}}/api/attendance/clock-out",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"workerId\":1}" }
+          }
+        },
+        {
+          "name": "Active Workers (Redis)",
+          "request": { "method": "GET", "url": "{{base}}/api/attendance/active" }
+        },
+        {
+          "name": "Attendance Log",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base}}/api/attendance/log?workerId=1&from=2026-05-01&to=2026-05-31&page=0&size=20",
+              "query": [
+                { "key": "workerId", "value": "1" },
+                { "key": "from", "value": "2026-05-01" },
+                { "key": "to", "value": "2026-05-31" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Overtime",
+      "item": [
+        {
+          "name": "Monthly Summary",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base}}/api/overtime/summary/1?month=2026-05",
+              "query": [{ "key": "month", "value": "2026-05" }]
+            }
+          }
+        },
+        {
+          "name": "Settle Overtime",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base}}/api/overtime/settle/1?month=2026-04",
+              "query": [{ "key": "month", "value": "2026-04" }]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

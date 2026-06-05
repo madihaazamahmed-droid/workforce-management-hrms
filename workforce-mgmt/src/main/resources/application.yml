@@ -1,0 +1,66 @@
+spring:
+  application:
+    name: workforce-mgmt
+
+  # ── PostgreSQL / Supabase ──────────────────────────────────────────────────
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/workforce}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+    # LF-205 FIX: HikariCP tuned for Supabase (and any cloud Postgres)
+    hikari:
+      # Use Supabase connection pooler URL (port 6543/PgBouncer) in prod, not 5432 direct
+      # See README for Supabase connection setup
+      connection-timeout: 20000          # 20s max wait to get a connection from pool
+      idle-timeout: 300000               # 5min — must be < Supabase's 5min idle kill
+      max-lifetime: 600000               # 10min — rotate connections before server kills them
+      keepalive-time: 60000              # Ping idle connections every 60s to keep them warm
+      maximum-pool-size: 10             # Supabase free tier supports ~15 simultaneous connections
+      minimum-idle: 2
+      connection-test-query: SELECT 1
+
+  # ── JPA / Hibernate ───────────────────────────────────────────────────────
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false   # Set true locally to verify JOIN FETCH (LF-203 fix)
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        default_batch_fetch_size: 20   # Batch lazy loads to reduce N+1 in edge cases
+
+  # ── Redis ──────────────────────────────────────────────────────────────────
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      # LF-202 FIX: short timeout so app starts fast even if Redis is down
+      connect-timeout: 2000   # 2s connect timeout (default is unlimited — causes startup hang)
+      timeout: 1000           # 1s read/write timeout
+
+  # ── Pageable defaults (LF-203 safety net) — merged under spring.data ───────
+  # (see spring.data.redis above; pageable is a sibling key under spring.data.web)
+  # Configure in code via PageableHandlerMethodArgumentResolverCustomizer bean if needed
+
+# ── CORS — externalized so each env can override (LF-201 FIX) ───────────────
+cors:
+  allowed-origins:
+    - http://localhost:3000
+    - http://localhost:5173
+
+# ── Actuator ──────────────────────────────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized
+
+server:
+  port: 8080
